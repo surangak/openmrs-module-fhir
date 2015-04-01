@@ -14,12 +14,10 @@
 package org.openmrs.module.fhir.providers;
 
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -33,108 +31,119 @@ import java.util.List;
 
 public class RestfulPatientResourceProvider implements IResourceProvider {
 
-	private static final Log log = LogFactory.getLog(RestfulPatientResourceProvider.class);
-	private FHIRPatientResource patientResource;
+    private static final Log log = LogFactory.getLog(RestfulPatientResourceProvider.class);
+    private FHIRPatientResource patientResource;
 
-	public RestfulPatientResourceProvider() {
-		patientResource = new FHIRPatientResource();
-	}
+    public RestfulPatientResourceProvider() {
+        patientResource = new FHIRPatientResource();
+    }
 
-	@Override
-	public Class<? extends IResource> getResourceType() {
-		return Patient.class;
-	}
+    @Override
+    public Class<? extends IResource> getResourceType() {
+        return Patient.class;
+    }
 
-	/**
-	 * Get patient by patient uuid
-	 *
-	 * @param id id object containing the requested id
-	 * @return Returns a resource matching this identifier, or null if none exists.
-	 */
-	@Read()
-	public Patient getResourceById(@IdParam IdDt id) {
-		Patient patient = null;
-		patient = patientResource.getByUniqueId(id);
-		return patient;
-	}
+    /**
+     * Get patient by patient uuid
+     *
+     * @param id id object containing the requested id
+     * @return Returns a resource matching this identifier, or null if none exists.
+     */
+    @Read()
+    public Patient getResourceById(@IdParam IdDt id) {
+        Patient patient = null;
+        patient = patientResource.getByUniqueId(id);
+        return patient;
+    }
 
-	/**
-	 * Search patient by unique id
-	 *
-	 * @param id object containing the requested id
-	 */
-	@Search()
-	public List<Patient> searchPatientByUniqueId(@RequiredParam(name = Patient.SP_RES_ID) TokenParam id) {
-		return patientResource.searchByUniqueId(id);
-	}
+    /**
+     * Search patient by unique id
+     *
+     * @param id object containing the requested id
+     */
+    @Search()
+    public List<Patient> searchPatientByUniqueId(@RequiredParam(name = Patient.SP_RES_ID) TokenParam id) {
+        return patientResource.searchByUniqueId(id);
+    }
 
-	/**
-	 * Get patients by family name
-	 *
-	 * @param theFamilyName object contaning the requested family name
-	 */
-	@Search()
-	public List<Patient> findPatientsByFamilyName(@RequiredParam(name = Patient.SP_FAMILY) StringParam theFamilyName) {
-		return patientResource.searchByFamilyName(theFamilyName);
-	}
+    /**
+     * Get patients by family name
+     *
+     * @param theFamilyName object contaning the requested family name
+     */
+    @Search()
+    public List<Patient> findPatientsByFamilyName(@RequiredParam(name = Patient.SP_FAMILY) StringParam theFamilyName) {
+        return patientResource.searchByFamilyName(theFamilyName);
+    }
 
-	/**
-	 * Get patients by name
-	 *
-	 * @param name name of the patient
-	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be
-	 * empty.
-	 */
-	@Search()
-	public List<Patient> findPatientsByName(@RequiredParam(name = Patient.SP_NAME) StringParam name) {
-		return patientResource.searchByName(name);
-	}
+    /**
+     * Get patients by name
+     *
+     * @param name name of the patient
+     * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be
+     * empty.
+     */
+    @Search()
+    public List<Patient> findPatientsByName(@RequiredParam(name = Patient.SP_NAME) StringParam name) {
+        return patientResource.searchByName(name);
+    }
 
-	/**
-	 * Get patients by identifier
-	 *
-	 * @param identifier
-	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be
-	 * empty.
-	 */
-	@Search()
-	public List<Patient> searchPatientsByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier) {
-		return patientResource.searchByIdentifier(identifier);
-	}
+    /**
+     * Get patients by identifier
+     *
+     * @param identifier
+     * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be
+     * empty.
+     */
+    @Search()
+    public List<Patient> searchPatientsByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier) {
+        return patientResource.searchByIdentifier(identifier);
+    }
 
-	/**
-	 * Get active patients
-	 *
-	 * @param active search term
-	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be
-	 * empty.
-	 */
-	@Search()
-	public List<Patient> findActivePatients(@RequiredParam(name = Patient.SP_ACTIVE) TokenParam active) {
-		return patientResource.searchPatients(active);
-	}
+    /**
+     * Get active patients
+     *
+     * @param active search term
+     * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be
+     * empty.
+     */
+    @Search()
+    public List<Patient> findActivePatients(@RequiredParam(name = Patient.SP_ACTIVE) TokenParam active) {
+        return patientResource.searchPatients(active);
+    }
 
-	/**
-	 * Find patients by given name
-	 *
-	 * @param givenName given name of the patient
-	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be
-	 * empty.
-	 */
-	@Search()
-	public List<Patient> findPatientsByGivenName(@RequiredParam(name = Patient.SP_GIVEN) StringParam givenName) {
-		return patientResource.searchByGivenName(givenName);
-	}
+    /**
+     * Find patients by given name
+     *
+     * @param givenName given name of the patient
+     * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be
+     * empty.
+     */
+    @Search()
+    public List<Patient> findPatientsByGivenName(@RequiredParam(name = Patient.SP_GIVEN) StringParam givenName) {
+        return patientResource.searchByGivenName(givenName);
+    }
 
-	/**
-	 * Find patients by provider
-	 *
-	 * @param provider the provider of the patient
-	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be
-	 * empty.
-	 */
-	@Search()
-	public List<Patient> searchPatientsByProvider(@RequiredParam(name = Patient.SP_CAREPROVIDER) ReferenceParam provider) {
-		throw new NotImplementedOperationException("Find patients by provider is not implemented yet");
-	}
+    /**
+     * Find patients by provider
+     *
+     * @param provider the provider of the patient
+     * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be
+     * empty.
+     */
+    @Search()
+    public List<Patient> searchPatientsByProvider(@RequiredParam(name = Patient.SP_CAREPROVIDER) ReferenceParam provider) {
+        throw new NotImplementedOperationException("Find patients by provider is not implemented yet");
+    }
+
+    /**
+     * Implementation of $everything operation which returns content of a patient
+     *
+     * @param patientId if of the patient
+     * @return bundle
+     */
+    @Operation(name = "$everything")
+    public Bundle patientInstanceOperation(@IdParam IdDt patientId) {
+        return patientResource.getPatientOperationsById(patientId);
+    }
 }
