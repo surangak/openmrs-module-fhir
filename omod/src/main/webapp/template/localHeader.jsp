@@ -32,6 +32,13 @@
 			code="fhir.settings"/></a>
 	</li>
 
+    <li
+    <c:if test='<%= request.getRequestURI().contains("/test") %>'>class="active"</c:if>>
+    <a
+            href="${pageContext.request.contextPath}/module/fhir/test.form"><spring:message
+            code="fhir.test"/></a>
+    </li>
+
 	                                                                                     <!-- Add further links here -->
 </ul>
 <h2>
