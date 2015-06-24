@@ -1,8 +1,11 @@
 package org.openmrs.module.fhir.api.diagnosticreport.handler;
 
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -14,6 +17,7 @@ import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.fhir.api.ObsService;
 import org.openmrs.module.fhir.api.PatientService;
 import org.openmrs.module.fhir.api.PractitionerService;
 import org.openmrs.module.fhir.api.diagnosticreport.DiagnosticReportHandler;
@@ -120,6 +124,7 @@ public class LaboratoryHandler extends AbstractHandler implements DiagnosticRepo
 		} else {
 			// Get Id of the Performer
 			String practitionerID = diagnosticReport.getPerformer().getReference().getIdPart();
+			System.out.print(" practitionner id : " + practitionerID);
 			// Assume that Performer is stored in the OpenMRS database
 			PractitionerService fhirPractitionerService = Context.getService(PractitionerService.class);
 			Practitioner practitioner = fhirPractitionerService.getPractitioner(practitionerID);
@@ -144,7 +149,15 @@ public class LaboratoryHandler extends AbstractHandler implements DiagnosticRepo
 		// Set parsed obsSet (`Result` as Set of Obs)
 		// Set Binary Obs Handler which used to store `PresentedForm`
 
+		List<IResource> containedResources = diagnosticReport.getContained().getContainedResources();
+		for(IResource resource : containedResources){
+			if(resource.getResourceName().equals("Observation")){
+				Context.getService(ObsService.class).createFHIRObservation((Observation)resource);
+			}
+		}
+
 		// Create resource in OpenMRS Database
+		System.out.println("obs size ----> " + omrsDiagnosticReport.getObs().size());
 		Encounter omrsEncounter = encounterService.saveEncounter(omrsDiagnosticReport);
 		diagnosticReport.setId(new IdDt("DiagnosticReport", omrsEncounter.getUuid()));
 		return diagnosticReport;

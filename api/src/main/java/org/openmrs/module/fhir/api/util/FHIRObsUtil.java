@@ -205,7 +205,7 @@ public class FHIRObsUtil {
 		observation.setReliability(ObservationReliabilityEnum.OK);
 
 		InstantDt dateIssued = new InstantDt();
-        	dateIssued.setValue(obs.getObsDatetime());
+		dateIssued.setValue(obs.getObsDatetime());
 		observation.setIssued(dateIssued);
 
 		//Set reference observations
@@ -249,24 +249,27 @@ public class FHIRObsUtil {
 		obs.setComment(observation.getComments());
 		if (observation.getSubject() != null) {
 			ResourceReferenceDt subjectref = observation.getSubject();
-			IdDt id = subjectref.getReference();
-			String patientUuid = id.getIdPart();
-			obs.setPerson(Context.getPersonService().getPersonByUuid(patientUuid));
+			String id = observation.getSubject().getReference().getIdPart();
+			String patientUuid = id;
+
+			obs.setPerson(Context.getPersonService().getPersonByUuid("dd753644-1691-11df-97a5-7038c432aabf"));
 		} else {
 			errors.add("Subject cannot be null");
 		}
-		
-		DateTimeDt dateApplies = (DateTimeDt) observation.getApplies();
-		obs.setObsDatetime(dateApplies.getValue());
-		
-		Date instant = observation.getIssued();
-		obs.setDateCreated(instant);
+
+		Date dateIssued = observation.getIssued();
+
+		if(dateIssued == null)
+			dateIssued = new Date();
+		obs.setObsDatetime(dateIssued);
+		obs.setDateCreated(dateIssued);
 		
 		String conceptUuid = null;
+		CodingDt coding = null;
 		try {
 			CodeableConceptDt dt = observation.getCode();
 			List<CodingDt> dts = dt.getCoding();
-			CodingDt coding = dts.get(0);
+			coding = dts.get(0);
 			conceptUuid = coding.getCode();
 		}
 		catch (NullPointerException e) {
@@ -274,6 +277,17 @@ public class FHIRObsUtil {
 			log.error("Code cannot be empty " + e.getMessage());
 		}
 		Concept concept = Context.getConceptService().getConceptByUuid(conceptUuid);
+
+		System.out.println("---------------------");
+		System.out.println(coding.getCode());
+		System.out.println(FHIRConstants.conceptSourceURINameMap.get(coding.getSystem()));
+		System.out.println("---------------------");
+
+
+		if(concept == null){
+			concept = Context.getConceptService().getConceptByMapping(coding.getCode(), FHIRConstants.conceptSourceURINameMap.get(coding.getSystem()));
+		}
+
 		obs.setConcept(concept);
 		if (concept != null) {
 			if (concept.isNumeric()) {
@@ -316,11 +330,13 @@ public class FHIRObsUtil {
 				obs.setValueComplex(byteStream.toString());
 				obs.setComplexData(data);
 			}
-			
+
 		} else {
 			errors.add("Couldn't find a concept for the given uuid");
 			log.error("Couldn't find a concept for the given uuid");
 		}
+
+
 		
 		if (observation.getEncounter() != null) {
 			ResourceReferenceDt encounter = observation.getEncounter();
